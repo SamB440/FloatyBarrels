@@ -2,12 +2,11 @@ package com.convallyria.floatybarrels.listener;
 
 import com.convallyria.floatybarrels.FloatyBarrels;
 import com.convallyria.floatybarrels.player.BarrelPlayer;
-import org.bukkit.ChatColor;
+import com.convallyria.floatybarrels.translation.Translations;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -33,7 +32,7 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
         if (isSurroundedByWater(block)) {
             Barrel barrel = (Barrel) block.getState();
             Directional directional = (Directional) barrel.getBlockData();
-            if (directional.getFacing() != BlockFace.UP) {
+            if (!plugin.getValidFaces().contains(directional.getFacing())) {
                 return;
             }
 
@@ -55,14 +54,13 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
             slime.setPersistent(true);
             slime.setSilent(true);
 
-            if (player.isCollidable()) player.setCollidable(false);
+            if (plugin.overrideColliding() && player.isCollidable()) player.setCollidable(false);
 
             BarrelPlayer barrelPlayer = plugin.addBarrelPlayer(player);
             barrelPlayer.setBarrel(barrel, slime);
             slime.addPassenger(player); // Add player as passenger on arrow
 
-            //TODO translation
-            player.sendMessage(ChatColor.GREEN + "You are now floating in a barrel!");
+            Translations.BARREL_FLOATING.send(player);
         }
     }
 
@@ -83,12 +81,13 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
 
     private boolean isSurroundedByWater(Block block) {
         final Location start = block.getLocation();
+        if (!plugin.requireWater()) return start.clone().add(0, 1, 0).getBlock().getType().isAir();
+
         final int radius = 1;
         for (double x = start.getX() - radius; x <= start.getX() + radius; x++) {
             for (double y = start.getY() - radius; y <= start.getY() + radius; y++) {
                 for (double z = start.getZ() - radius; z <= start.getZ() + radius; z++) {
                     Location location = new Location(start.getWorld(), x, y, z);
-                    System.out.println(location.getBlock());
                     if (location.getBlock().getType() != Material.WATER
                             && location.getBlock().getType() != Material.AIR
                             && location.getBlock().getType() != Material.BARREL) {

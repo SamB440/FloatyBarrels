@@ -1,0 +1,20 @@
+debug: false
+# Block to replace behind the barrel when it moves
+replace-block: AIR
+# Whether to let barrels be sunk via bubble magma columns
+barrel-sink: true
+# Whether to drop items when a barrel is sunk
+drop-sunk-items: true
+# Whether to block attempting to move into solid objects
+block-path: true
+# Whether inventory will move with the barrel
+move-inventory: true
+# Cooldown to be able to move again (in seconds)
+cooldown: 1
+# Whether to require the barrel to be surrounded by water (with air on top) to be able to enter
+require-water: true
+# Whether to override colliding, disable if using a plugin that disables colliding entirely
+override-colliding: true
+# What ways the barrel can be facing in order to allow entry
+barrel-faces:
+  - UP

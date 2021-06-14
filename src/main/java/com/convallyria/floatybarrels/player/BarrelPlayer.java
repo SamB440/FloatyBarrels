@@ -24,6 +24,7 @@ import java.util.Optional;
 
 public class BarrelPlayer {
 
+    private final FloatyBarrels plugin;
     private final Player player;
     private Barrel barrel;
     private long barrelEnterTime;
@@ -31,6 +32,7 @@ public class BarrelPlayer {
     private long cooldown;
 
     public BarrelPlayer(Player player) {
+        this.plugin = JavaPlugin.getPlugin(FloatyBarrels.class);
         this.player = player;
     }
 
@@ -58,7 +60,7 @@ public class BarrelPlayer {
     }
 
     public boolean hasCooldown() {
-        return ((System.currentTimeMillis() - cooldown) / 1000) < 1;
+        return ((System.currentTimeMillis() - cooldown) / 1000) < plugin.getMovementCooldown();
     }
 
     public void setBarrelEnterTime(long barrelEnterTime) {
@@ -71,7 +73,7 @@ public class BarrelPlayer {
 
     public void handleInput(@Nullable SteerKey forward, @Nullable SteerKey side) {
         if (!Bukkit.isPrimaryThread()) {
-            JavaPlugin.getPlugin(FloatyBarrels.class).getLogger().severe("Cannot handle input off main thread!");
+            plugin.getLogger().severe("Cannot handle input off main thread!");
             return;
         }
 
@@ -80,11 +82,7 @@ public class BarrelPlayer {
             Block newBlock = null;
             if (side != null) {
                 Pair<Block, Block> leftRight = BlockUtils.getLeftAndRightBlocks(player, barrel.getBlock());
-                if (side == SteerKey.A) {
-                    newBlock = leftRight.getLeft();
-                } else {
-                    newBlock = leftRight.getRight();
-                }
+                newBlock = side == SteerKey.A ? leftRight.getLeft() : leftRight.getRight();
             } else if (forward != null) {
                 final BlockFace facing = forward == SteerKey.S ? player.getFacing().getOppositeFace() : player.getFacing();
                 newBlock = barrel.getBlock().getRelative(facing);
@@ -108,9 +106,11 @@ public class BarrelPlayer {
 
             Barrel newBarrel = (Barrel) newBlock.getState();
             newBarrel.open();
-            newBarrel.getInventory().setContents(barrel.getInventory().getContents()); // Copy inventory
-            barrel.getInventory().clear(); // No duping, thanks!
-            barrel.getBlock().setType(Material.AIR, true);
+            if (plugin.canMoveInventory()) {
+                newBarrel.getInventory().setContents(barrel.getInventory().getContents()); // Copy inventory
+                barrel.getInventory().clear(); // No duping, thanks!
+            }
+            barrel.getBlock().setType(plugin.getReplaceBlock(), true);
             this.barrel = newBarrel;
             this.cooldown = System.currentTimeMillis();
         }
@@ -124,13 +124,7 @@ public class BarrelPlayer {
         }
         slime.remove();
         barrel.close();
-        if (!player.isCollidable()) player.setCollidable(true);
+        if (plugin.overrideColliding() && !player.isCollidable()) player.setCollidable(true);
         plugin.removeBarrelPlayer(player);
-    }
-
-    private boolean isLocationEqual(Location origin, Location compare) {
-        return origin.getBlockX() == compare.getBlockX()
-                && origin.getBlockY() == compare.getBlockY()
-                && origin.getBlockZ() == compare.getBlockZ();
     }
 }
