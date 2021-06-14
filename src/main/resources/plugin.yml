@@ -1,0 +1,7 @@
+name: FloatyBarrels
+version: "${version}"
+main: com.convallyria.floatybarrels.FloatyBarrels
+api-version: '1.17'
+author: SamB440
+description: Take a float in your barrel
+website: https://www.convallyria.com
