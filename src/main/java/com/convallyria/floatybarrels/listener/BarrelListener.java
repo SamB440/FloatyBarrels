@@ -26,7 +26,7 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
         final Player player = event.getPlayer();
-        if (!player.isSneaking()) return;
+        if (!player.isSneaking() || !player.hasPermission("floatybarrels.float")) return;
         final Block block = event.getClickedBlock();
         if (block == null || block.getType() != Material.BARREL) return;
         if (isSurroundedByWater(block)) {
