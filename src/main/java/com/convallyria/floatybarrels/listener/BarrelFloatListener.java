@@ -56,7 +56,7 @@ public record BarrelFloatListener(FloatyBarrels plugin) implements Listener {
             }
         }
 
-        if (plugin.blockPath() && newBlock.getType().isSolid()) {
+        if (plugin.blockPath() && (newBlock.getType().isSolid() || newBlock.getType().isAir())) {
             Translations.BARREL_PATH_BLOCKED.send(player);
             event.setCancelled(true);
         }
