@@ -44,6 +44,7 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
                 int clampedExplosivePower = Math.min(explosivePower, plugin.maxExplosiveStrength());
                 player.getWorld().createExplosion(barrel.getLocation(), clampedExplosivePower, false, true, player);
                 event.setUseInteractedBlock(Event.Result.DENY);
+                Translations.BARREL_EXPLODED.send(player);
             }));
             return;
         }
