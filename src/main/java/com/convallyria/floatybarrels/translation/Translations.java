@@ -17,7 +17,8 @@ import java.util.List;
 public enum Translations {
     BARREL_SUNK("&cYer barrel be sunk!"),
     BARREL_FLOATING("&aYer now be floating in a barrel!"),
-    BARREL_PATH_BLOCKED("&cThe path be blocked!");
+    BARREL_PATH_BLOCKED("&cThe path be blocked!"),
+    BARREL_EXPLODED("&cYour barrel exploded into pieces! Don't transport such dangerous items next time!");
 
     private final String defaultValue;
     private final boolean isList;

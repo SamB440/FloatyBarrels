@@ -15,6 +15,10 @@ cooldown: 1
 require-water: true
 # Whether to override colliding, disable if using a plugin that disables colliding entirely
 override-colliding: true
+# If barrels should explode when right clicked with flint and steel and containing an explosive
+exploding-barrels: true
+# How powerful the explosion can go (higher values can cause lag / be a griefing tool)
+max-explosive-strength: 12
 # What ways the barrel can be facing in order to allow entry
 barrel-faces:
   - UP

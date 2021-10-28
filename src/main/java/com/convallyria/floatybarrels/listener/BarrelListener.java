@@ -17,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
@@ -26,9 +27,29 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
         final Player player = event.getPlayer();
-        if (!player.isSneaking() || !player.hasPermission("floatybarrels.float")) return;
+        if (!player.hasPermission("floatybarrels.float")) return;
+        if (!player.isSneaking() && plugin.explodingBarrels()
+                && event.getItem() != null && event.getItem().getType() == Material.FLINT_AND_STEEL) {
+            plugin.getBarrelPlayer(player.getUniqueId()).ifPresent(barrelPlayer -> barrelPlayer.getBarrel().ifPresent(barrel -> {
+                barrelPlayer.setBarrelEnterTime(0); // Important! Will dupe barrels if this is not set.
+                barrelPlayer.eject(null);
+                boolean hasExplosives = barrel.getInventory().contains(Material.TNT);
+                if (!hasExplosives) return;
+                int explosivePower = 0;
+                for (ItemStack stack : barrel.getInventory().getContents()) {
+                    if (stack != null && stack.getType() == Material.TNT) {
+                        explosivePower = explosivePower + stack.getAmount();
+                    }
+                }
+                int clampedExplosivePower = Math.min(explosivePower, plugin.maxExplosiveStrength());
+                player.getWorld().createExplosion(barrel.getLocation(), clampedExplosivePower, false, true, player);
+                event.setUseInteractedBlock(Event.Result.DENY);
+            }));
+            return;
+        }
+
         final Block block = event.getClickedBlock();
-        if (block == null || block.getType() != Material.BARREL) return;
+        if (block == null || block.getType() != Material.BARREL || !player.isSneaking()) return;
         if (isSurroundedByWater(block)) {
             Barrel barrel = (Barrel) block.getState();
             Directional directional = (Directional) barrel.getBlockData();
@@ -40,27 +61,29 @@ public record BarrelListener(FloatyBarrels plugin) implements Listener {
 
             event.setUseInteractedBlock(Event.Result.DENY); // We don't want them opening the inventory!
 
-            // Spawn an arrow at centre of barrel and set its properties
+            // Spawn a slime at centre of barrel and set its properties
             final Location barrelCentre = block.getLocation().clone().add(0.5, 0.3, 0.5);
-            Slime slime = (Slime) player.getWorld().spawnEntity(barrelCentre, EntityType.SLIME);
-            slime.setGravity(false);
-            slime.setSize(1);
-            slime.setAI(false);
-            slime.setAware(false);
-            slime.setCollidable(false);
-            slime.setVelocity(new Vector(0, 0, 0));
-            slime.setInvisible(true);
-            slime.setInvulnerable(true);
-            slime.setPersistent(true);
-            slime.setSilent(true);
+            player.getWorld().spawn(barrelCentre, Slime.class, slimeSpawn -> {
+                slimeSpawn.setInvisible(true);
+                slimeSpawn.setGravity(false);
+                slimeSpawn.setSize(1);
+                slimeSpawn.setAI(false);
+                slimeSpawn.setAware(false);
+                slimeSpawn.setCollidable(false);
+                slimeSpawn.setVelocity(new Vector(0, 0, 0));
+                slimeSpawn.setInvisible(true);
+                slimeSpawn.setInvulnerable(true);
+                slimeSpawn.setPersistent(true);
+                slimeSpawn.setSilent(true);
 
-            if (plugin.overrideColliding() && player.isCollidable()) player.setCollidable(false);
+                if (plugin.overrideColliding() && player.isCollidable()) player.setCollidable(false);
 
-            BarrelPlayer barrelPlayer = plugin.addBarrelPlayer(player);
-            barrelPlayer.setBarrel(barrel, slime);
-            slime.addPassenger(player); // Add player as passenger on arrow
+                BarrelPlayer barrelPlayer = plugin.addBarrelPlayer(player);
+                barrelPlayer.setBarrel(barrel, slimeSpawn);
 
-            Translations.BARREL_FLOATING.send(player);
+                slimeSpawn.addPassenger(player); // Add player as passenger on slime
+                Translations.BARREL_FLOATING.send(player);
+            });
         }
     }
 

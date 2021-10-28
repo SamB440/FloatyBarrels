@@ -4,7 +4,7 @@ plugins {
 }
 
 var group = "com.convallyria"
-val version = "1.0.0"
+val version = "1.0.1"
 
 java.sourceCompatibility = JavaVersion.VERSION_16
 java.targetCompatibility = JavaVersion.VERSION_16

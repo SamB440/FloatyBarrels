@@ -1,3 +1,4 @@
 barrel_sunk: "&cYer barrel be sunk!"
 barrel_floating: "&aYer now be floating in a barrel!"
 barrel_path_blocked: "&cThe path be blocked!"
+barrel_exploded: "&cYour barrel exploded into pieces! Don't transport such dangerous items next time!"

@@ -122,6 +122,7 @@ public class BarrelPlayer {
             if (event != null) event.setCancelled(true);
             return;
         }
+
         slime.remove();
         barrel.close();
         if (plugin.overrideColliding() && !player.isCollidable()) player.setCollidable(true);

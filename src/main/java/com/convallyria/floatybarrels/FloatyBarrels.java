@@ -143,6 +143,14 @@ public final class FloatyBarrels extends JavaPlugin implements LanguagyPluginHoo
         return getConfig().getBoolean("override-colliding");
     }
 
+    public boolean explodingBarrels() {
+        return getConfig().getBoolean("exploding-barrels");
+    }
+
+    public int maxExplosiveStrength() {
+        return getConfig().getInt("max-explosive-strength");
+    }
+
     public List<BlockFace> getValidFaces() {
         List<BlockFace> faces = new ArrayList<>();
         for (String face : getConfig().getStringList("barrel-faces")) {
