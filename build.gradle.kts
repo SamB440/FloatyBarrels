@@ -25,6 +25,7 @@ repositories {
         url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     }
     maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://repo.codemc.io/repository/nms/") }
 }
 
 dependencies {
